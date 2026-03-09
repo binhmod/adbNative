@@ -1,6 +1,20 @@
 package me.binhmod.adb
 
 import android.util.Log
+import me.binhmod.adb.AdbProtocol.ADB_AUTH_RSAPUBLICKEY
+import me.binhmod.adb.AdbProtocol.ADB_AUTH_SIGNATURE
+import me.binhmod.adb.AdbProtocol.ADB_AUTH_TOKEN
+import me.binhmod.adb.AdbProtocol.A_AUTH
+import me.binhmod.adb.AdbProtocol.A_CLSE
+import me.binhmod.adb.AdbProtocol.A_CNXN
+import me.binhmod.adb.AdbProtocol.A_MAXDATA
+import me.binhmod.adb.AdbProtocol.A_OKAY
+import me.binhmod.adb.AdbProtocol.A_OPEN
+import me.binhmod.adb.AdbProtocol.A_STLS
+import me.binhmod.adb.AdbProtocol.A_STLS_VERSION
+import me.binhmod.adb.AdbProtocol.A_VERSION
+import me.binhmod.adb.AdbProtocol.A_WRTE
+import me.binhmod.adb.logd
 import rikka.core.util.BuildUtils
 import java.io.Closeable
 import java.io.DataInputStream
@@ -12,8 +26,7 @@ import javax.net.ssl.SSLSocket
 
 private const val TAG = "AdbClient"
 
-class AdbClient(private val host: String, private val port: Int, private val key: AdbKey) :
-    Closeable {
+class AdbClient(private val host: String, private val port: Int, private val key: AdbKey) : Closeable {
 
     private lateinit var socket: Socket
     private lateinit var plainInputStream: DataInputStream
@@ -34,14 +47,14 @@ class AdbClient(private val host: String, private val port: Int, private val key
         plainInputStream = DataInputStream(socket.getInputStream())
         plainOutputStream = DataOutputStream(socket.getOutputStream())
 
-        write(AdbProtocol.A_CNXN, AdbProtocol.A_VERSION, AdbProtocol.A_MAXDATA, "host::")
+        write(A_CNXN, A_VERSION, A_MAXDATA, "host::")
 
         var message = read()
-        if (message.command == AdbProtocol.A_STLS) {
+        if (message.command == A_STLS) {
             if (!BuildUtils.atLeast29) {
                 error("Connect to adb with TLS is not supported before Android 9")
             }
-            write(AdbProtocol.A_STLS, AdbProtocol.A_STLS_VERSION, 0)
+            write(A_STLS, A_STLS_VERSION, 0)
 
             val sslContext = key.sslContext
             tlsSocket = sslContext.socketFactory.createSocket(socket, host, port, true) as SSLSocket
@@ -53,45 +66,46 @@ class AdbClient(private val host: String, private val port: Int, private val key
             useTls = true
 
             message = read()
-        } else if (message.command == AdbProtocol.A_AUTH) {
-            write(AdbProtocol.A_AUTH, AdbProtocol.ADB_AUTH_SIGNATURE, 0, key.sign(message.data))
+        } else if (message.command == A_AUTH) {
+            if (message.command != A_AUTH && message.arg0 != ADB_AUTH_TOKEN) error("not A_AUTH ADB_AUTH_TOKEN")
+            write(A_AUTH, ADB_AUTH_SIGNATURE, 0, key.sign(message.data))
 
             message = read()
-            if (message.command != AdbProtocol.A_CNXN) {
-                write(AdbProtocol.A_AUTH, AdbProtocol.ADB_AUTH_RSAPUBLICKEY, 0, key.adbPublicKey)
+            if (message.command != A_CNXN) {
+                write(A_AUTH, ADB_AUTH_RSAPUBLICKEY, 0, key.adbPublicKey)
                 message = read()
             }
         }
 
-        if (message.command != AdbProtocol.A_CNXN) error("not A_CNXN")
+        if (message.command != A_CNXN) error("not A_CNXN")
     }
 
     fun shellCommand(command: String, listener: ((ByteArray) -> Unit)?) {
         val localId = 1
-        write(AdbProtocol.A_OPEN, localId, 0, "shell:$command")
+        write(A_OPEN, localId, 0, "shell:$command")
 
         var message = read()
         when (message.command) {
-            AdbProtocol.A_OKAY -> {
+            A_OKAY -> {
                 while (true) {
                     message = read()
                     val remoteId = message.arg0
-                    if (message.command == AdbProtocol.A_WRTE) {
+                    if (message.command == A_WRTE) {
                         if (message.data_length > 0) {
                             listener?.invoke(message.data!!)
                         }
-                        write(AdbProtocol.A_OKAY, localId, remoteId)
-                    } else if (message.command == AdbProtocol.A_CLSE) {
-                        write(AdbProtocol.A_CLSE, localId, remoteId)
+                        write(A_OKAY, localId, remoteId)
+                    } else if (message.command == A_CLSE) {
+                        write(A_CLSE, localId, remoteId)
                         break
                     } else {
                         error("not A_WRTE or A_CLSE")
                     }
                 }
             }
-            AdbProtocol.A_CLSE -> {
+            A_CLSE -> {
                 val remoteId = message.arg0
-                write(AdbProtocol.A_CLSE, localId, remoteId)
+                write(A_CLSE, localId, remoteId)
             }
             else -> {
                 error("not A_OKAY or A_CLSE")
@@ -99,18 +113,9 @@ class AdbClient(private val host: String, private val port: Int, private val key
         }
     }
 
-    private fun write(command: Int, arg0: Int, arg1: Int, data: ByteArray? = null) = write(
-        AdbMessage(command, arg0, arg1, data)
-    )
+    private fun write(command: Int, arg0: Int, arg1: Int, data: ByteArray? = null) = write(AdbMessage(command, arg0, arg1, data))
 
-    private fun write(command: Int, arg0: Int, arg1: Int, data: String) = write(
-        AdbMessage(
-            command,
-            arg0,
-            arg1,
-            data
-        )
-    )
+    private fun write(command: Int, arg0: Int, arg1: Int, data: String) = write(AdbMessage(command, arg0, arg1, data))
 
     private fun write(message: AdbMessage) {
         outputStream.write(message.toByteArray())

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class EmptyPrefsImpl implements SharedPreferences {
+public class EmptySharedPreferencesImpl implements SharedPreferences {
 
     @Override
     public Map<String, ?> getAll() {

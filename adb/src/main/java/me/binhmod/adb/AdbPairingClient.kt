@@ -256,7 +256,8 @@ class AdbPairingClient(private val host: String, private val port: Int, private 
         val theirMessage = ByteArray(theirHeader.payload)
         inputStream.readFully(theirMessage)
 
-        return pairingContext.initCipher(theirMessage)
+        if (!pairingContext.initCipher(theirMessage)) return false
+        return true
     }
 
     private fun doExchangePeerInfo(): Boolean {

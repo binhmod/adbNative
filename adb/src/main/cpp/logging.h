@@ -1,11 +1,11 @@
-#ifndef LOGGING_H
-#define LOGGING_H
+#ifndef _LOGGING_H
+#define _LOGGING_H
 
-#include <cerrno>
+#include <errno.h>
 #include "android/log.h"
 
 #ifndef LOG_TAG
-#define LOG_TAG    "Axeron"
+#define LOG_TAG    "BMAdb"
 #endif
 
 #ifndef NO_LOG
@@ -27,4 +27,4 @@
 #define LOGE(...)
 #define PLOGE(fmt, args...)
 #endif
-#endif // LOGGING_H
+#endif // _LOGGING_H

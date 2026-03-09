@@ -1,9 +1,10 @@
 plugins {
-    id "com.android.application"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
-    namespace = "me.binhmod.app"
+    namespace = "me.binhmod.adb"
     compileSdk = 36
 
     defaultConfig {
@@ -13,6 +14,10 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    
+    buildFeatures {
+        viewBinding true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -21,5 +26,17 @@ android {
 }
 dependencies {
     implementation(project(":adb"))
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "androidx.core:core-ktx:1.12.0"
     implementation(libs.material)
+    
+    implementation 'dev.rikka.rikkax.compatibility:compatibility:2.0.0'
+    implementation 'dev.rikka.rikkax.widget:borderview:1.1.0'
+    implementation 'dev.rikka.rikkax.core:core-ktx:1.4.1'
+    implementation 'dev.rikka.rikkax.lifecycle:lifecycle-resource-livedata:1.0.1'
+    implementation 'dev.rikka.rikkax.lifecycle:lifecycle-shared-viewmodel:1.0.1'
+    implementation 'dev.rikka.rikkax.lifecycle:lifecycle-viewmodel-lazy:2.0.0'
+
+    
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:6.1'
 }

@@ -8,3 +8,9 @@ plugins {
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
+
+subprojects {
+    tasks.withType(AbstractCopyTask).configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}

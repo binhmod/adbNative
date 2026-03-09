@@ -15,10 +15,9 @@ import java.net.ServerSocket
 @RequiresApi(Build.VERSION_CODES.R)
 class AdbMdns(
     context: Context, private val serviceType: String,
-    private val observer: Observer<AdbData>
+    private val observer: Observer<Int>
 ) {
 
-    data class AdbData(val status: Int, val host: String, val port: Int)
     private var registered = false
     private var running = false
     private var serviceName: String? = null
@@ -54,7 +53,7 @@ class AdbMdns(
     }
 
     private fun onServiceLost(info: NsdServiceInfo) {
-        if (info.serviceName == serviceName) observer.onChanged(AdbData(STATUS_LOST, "", -1))
+        if (info.serviceName == serviceName) observer.onChanged(-1)
     }
 
     private fun onServiceResolved(resolvedService: NsdServiceInfo) {
@@ -63,15 +62,12 @@ class AdbMdns(
                 .any { networkInterface ->
                     networkInterface.inetAddresses
                         .asSequence()
-                        .any {
-                            resolvedService.host.hostAddress == it.hostAddress
-                        }
+                        .any { resolvedService.host.hostAddress == it.hostAddress }
                 }
             && isPortAvailable(resolvedService.port)
         ) {
             serviceName = resolvedService.serviceName
-            val host = resolvedService.host.hostAddress
-            observer.onChanged(AdbData(STATUS_RESOLVED,host!!, resolvedService.port))
+            observer.onChanged(resolvedService.port)
         }
     }
 
@@ -119,19 +115,15 @@ class AdbMdns(
     }
 
     internal class ResolveListener(private val adbMdns: AdbMdns) : NsdManager.ResolveListener {
-        override fun onResolveFailed(nsdServiceInfo: NsdServiceInfo, i: Int) {
-            Log.v(TAG, "onResolveFailed: $i")
-        }
+        override fun onResolveFailed(nsdServiceInfo: NsdServiceInfo, i: Int) {}
 
         override fun onServiceResolved(nsdServiceInfo: NsdServiceInfo) {
             adbMdns.onServiceResolved(nsdServiceInfo)
         }
+
     }
 
     companion object {
-        const val STATUS_FAILED = -1
-        const val STATUS_LOST = 0
-        const val STATUS_RESOLVED = 1
         const val TLS_CONNECT = "_adb-tls-connect._tcp"
         const val TLS_PAIRING = "_adb-tls-pairing._tcp"
         const val TAG = "AdbMdns"

@@ -1,5 +1,13 @@
 package me.binhmod.adb
 
+import me.binhmod.adb.AdbProtocol.A_AUTH
+import me.binhmod.adb.AdbProtocol.A_CLSE
+import me.binhmod.adb.AdbProtocol.A_CNXN
+import me.binhmod.adb.AdbProtocol.A_OKAY
+import me.binhmod.adb.AdbProtocol.A_OPEN
+import me.binhmod.adb.AdbProtocol.A_STLS
+import me.binhmod.adb.AdbProtocol.A_SYNC
+import me.binhmod.adb.AdbProtocol.A_WRTE
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -91,14 +99,14 @@ class AdbMessage(
 
     fun toStringShort(): String {
         val commandString = when (command) {
-            AdbProtocol.A_SYNC -> "A_SYNC"
-            AdbProtocol.A_CNXN -> "A_CNXN"
-            AdbProtocol.A_AUTH -> "A_AUTH"
-            AdbProtocol.A_OPEN -> "A_OPEN"
-            AdbProtocol.A_OKAY -> "A_OKAY"
-            AdbProtocol.A_CLSE -> "A_CLSE"
-            AdbProtocol.A_WRTE -> "A_WRTE"
-            AdbProtocol.A_STLS -> "A_STLS"
+            A_SYNC -> "A_SYNC"
+            A_CNXN -> "A_CNXN"
+            A_AUTH -> "A_AUTH"
+            A_OPEN -> "A_OPEN"
+            A_OKAY -> "A_OKAY"
+            A_CLSE -> "A_CLSE"
+            A_WRTE -> "A_WRTE"
+            A_STLS -> "A_STLS"
             else -> command.toString()
         }
         return "command=$commandString, arg0=$arg0, arg1=$arg1, data_length=$data_length, data_crc32=$data_crc32, magic=$magic, data=${data?.contentToString()}"

@@ -11,21 +11,24 @@ android {
         version = release(36)
     }
 
-
     defaultConfig {
         minSdk = 24
         consumerProguardFiles("consumer-rules.pro")
 
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a") // can remove this
+        }
+
         externalNativeBuild {
             cmake {
-                arguments += "-DANDROID_STL=none"
+                arguments += "-DANDROID_STL=none" // 
             }
         }
     }
 
     externalNativeBuild {
         cmake {
-            path = project.file("src/main/cpp/CMakeLists.txt")
+            path = file("src/main/cpp/CMakeLists.txt")
             version = "4.1.2"
         }
     }
@@ -62,9 +65,10 @@ kotlin {
 dependencies {
     
     implementation(libs.androidx.core.ktx)
-    implementation(libs.bcpkix.jdk18on)
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.androidx.lifecycle.livedata.core.ktx)
+    
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
 
     implementation(libs.boringssl)
     implementation(libs.libcxx)
