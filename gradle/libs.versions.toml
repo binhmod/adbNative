@@ -8,7 +8,7 @@ coreKtx = "1.17.0"
 libcxx = "29.0.14206865"
 boringssl = "20250114"
 hiddenApi = "4.4.0"
-annotationJvm = "1.9.1"
+annotationJvm = "1.10.0-alpha01"
 lifecycleLivedataCoreKtx = "2.10.0"
 
 [plugins]

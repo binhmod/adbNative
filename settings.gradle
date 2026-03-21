@@ -19,3 +19,4 @@ rootProject.name = "AdbNative"
 
 include(":app")
 include(":adb")
+include(":server")

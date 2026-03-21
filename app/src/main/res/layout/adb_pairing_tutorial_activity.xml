@@ -348,6 +348,13 @@
             android:id="@+id/openStarterButton"
             android:text="Open Starter with ADB" />
 
+        <Button
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginTop="16dp"
+            android:id="@+id/openShell"
+            android:text="Open Shell" />
+
     </LinearLayout>
 
 </rikka.widget.borderview.BorderNestedScrollView>

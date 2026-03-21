@@ -1,19 +1,16 @@
 package me.binhmod.adb.starter
 
 import me.binhmod.adb.application
-// import java.io.File
+import java.io.File
 
 object Starter {
 
-    // private val starterFile = File(application.applicationInfo.nativeLibraryDir, "libshizuku.so")
+    private val starterFile =
+        File(application.applicationInfo.nativeLibraryDir, "libpaigisk.so")
 
-    // val userCommand: String = starterFile.absolutePath
+    val adbCommand: String =
+        "adb shell ${starterFile.absolutePath}"
 
-    // val adbCommand = "adb shell $userCommand"
-    
-    val adbCommand = "adb shell echo adbCommand"
-
-    // val internalCommand = "$userCommand --apk=${application.applicationInfo.sourceDir}"
-    
-    val internalCommand = "echo internalCommand && id -u"
+    val internalCommand: String =
+        "${starterFile.absolutePath} --apk=${application.applicationInfo.sourceDir}"
 }
