@@ -62,14 +62,47 @@ public class ShellServer {
                 android.content.pm.IPackageManager pm =
                         android.content.pm.IPackageManager.Stub.asInterface(
                                 android.os.ServiceManager.getService("package"));
+<<<<<<< HEAD
                 android.content.pm.ApplicationInfo ai =
                         pm.getApplicationInfo(packageName, 0, userId);
+=======
+
+                android.content.pm.ApplicationInfo ai;
+
+                if (android.os.Build.VERSION.SDK_INT >= 30) {
+                    // Android 11+
+                    java.lang.reflect.Method m =
+                            pm.getClass()
+                                    .getMethod(
+                                            "getApplicationInfo",
+                                            String.class,
+                                            long.class,
+                                            int.class);
+                    ai = (android.content.pm.ApplicationInfo) m.invoke(pm, packageName, 0L, userId);
+                } else {
+                    // Android 10-
+                    java.lang.reflect.Method m =
+                            pm.getClass()
+                                    .getMethod(
+                                            "getApplicationInfo",
+                                            String.class,
+                                            int.class,
+                                            int.class);
+                    ai = (android.content.pm.ApplicationInfo) m.invoke(pm, packageName, 0, userId);
+                }
+
+>>>>>>> 919c1a6 (fix: pm.getApplicationInfo on Android 13+)
                 if (ai != null) {
                     appUid = ai.uid;
                     ShellServer.allowUid(appUid);
                     Log.d(TAG, "Whitelisted uid=" + appUid + " for " + packageName);
                 }
+<<<<<<< HEAD
             } catch (Exception e) {
+=======
+
+            } catch (Throwable e) {
+>>>>>>> 919c1a6 (fix: pm.getApplicationInfo on Android 13+)
                 Log.e(TAG, "Failed to get uid for " + packageName, e);
             }
 
@@ -186,7 +219,11 @@ public class ShellServer {
             Log.d(TAG, "onSessionExit: removing session " + id);
             sessions.remove(id);
         }
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 919c1a6 (fix: pm.getApplicationInfo on Android 13+)
         @Override
         public void exit() {
             enforceCaller();

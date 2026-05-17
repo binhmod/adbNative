@@ -5,7 +5,11 @@
 #include "android/log.h"
 
 #ifndef LOG_TAG
+<<<<<<< HEAD
 #define LOG_TAG    "BMAdb"
+=======
+#define LOG_TAG    "Paigisk"
+>>>>>>> 919c1a6 (fix: pm.getApplicationInfo on Android 13+)
 #endif
 
 #ifndef NO_LOG
